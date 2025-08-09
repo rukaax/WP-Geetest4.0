@@ -22,6 +22,7 @@ function add_captcha_env() {
 }
 add_action('login_enqueue_scripts','add_captcha_env');
 add_action('register_enqueue_scripts', 'add_captcha_env');
+add_action('wp_enqueue_scripts', 'add_captcha_env');
 
 function add_captcha_style() {
     echo '<div id="captcha"></div>';
@@ -232,6 +233,10 @@ function add_comment_captcha_API() {
         geetestObj = captcha;
         captcha.appendTo("#captcha");
 
+        captcha.onReady(function(){
+            // 验证码准备就绪
+        });
+
         captcha.onSuccess(function () {
             var result = captcha.getValidate();
             if(result) {
@@ -255,12 +260,18 @@ function add_comment_captcha_API() {
         captcha.onError(function(error) {
             layer.msg("验证出现错误,请刷新页面重试", {icon: 2});
         });
+        
+        captcha.onClose(function(){
+            if("'. GEETEST_PRODUCT .'" === "bind"){
+                layer.msg("请完成验证后继续");
+            }
+        });
     });
 
     // 处理评论表单提交
-    var commentSubmit = document.getElementById("submit");
-    if (commentSubmit) {
-        commentSubmit.addEventListener("click", function(e) {
+    var commentForm = document.getElementById("commentform");
+    if (commentForm) {
+        commentForm.addEventListener("submit", function(e) {
             if (!geetestObj) {
                 e.preventDefault();
                 layer.msg("验证码加载中，请稍后...");
